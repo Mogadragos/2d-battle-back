@@ -6,10 +6,17 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "tsc",
-        "start": "node dist/back/src/server.js",
+        "start": "node dist/src/server.js",
         "dev": "npm run build & npm run start"
     },
     "keywords": [],
     "author": "",
-    "license": "ISC"
+    "license": "ISC",
+    "dependencies": {
+        "socket.io": "^4.7.2"
+    },
+    "devDependencies": {
+        "@tsconfig/node18": "^18.2.1",
+        "typescript": "^5.2.2"
+    }
 }

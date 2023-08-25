@@ -1,0 +1,3 @@
+[submodule "2d-battle-shared"]
+	path = 2d-battle-shared
+	url = git@github.com:Mogadragos/2d-battle-shared.git

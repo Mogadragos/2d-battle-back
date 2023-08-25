@@ -16,7 +16,7 @@ export class WorkerManager {
     }
 
     createWorker(room: string) {
-        const worker = new Worker("./dist/game.js");
+        const worker = new Worker("./dist/src/game.js");
         worker.on("error", (e) => {
             console.error("Worker error");
             console.error(e);

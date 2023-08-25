@@ -1,7 +1,10 @@
 {
     "extends": "@tsconfig/node18/tsconfig.json",
     "compilerOptions": {
-        "rootDirs": ["./src", "../shared"],
+        "paths": {
+            "~shared/*": ["./2d-battle-shared/*"]
+        },
+        "rootDirs": ["./src", "./2d-battle-shared"],
         "outDir": "./dist"
     },
     "include": ["src/*"]
