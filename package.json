@@ -9,6 +9,9 @@
         "start": "node dist/src/server.js",
         "dev": "npm run build & npm run start"
     },
+    "_moduleAliases": {
+        "@shared": "dist/2d-battle-shared"
+    },
     "keywords": [],
     "author": "",
     "license": "ISC",
@@ -17,6 +20,7 @@
     },
     "devDependencies": {
         "@tsconfig/node18": "^18.2.1",
+        "module-alias": "^2.2.3",
         "typescript": "^5.2.2"
     }
 }

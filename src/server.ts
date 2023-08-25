@@ -1,7 +1,16 @@
+import "module-alias/register";
+
 import { Server } from "socket.io";
 import { ServerType } from "./types/ServerType";
 import { MatchMaker } from "./MatchMaker";
 import { WorkerManager } from "./WorkerManager";
+import { AppEventManager } from "./AppEventManager";
+
+declare global {
+    var eventManager: AppEventManager;
+}
+
+global.eventManager = new AppEventManager();
 
 const io: ServerType = new Server(3000, {
     cors: {

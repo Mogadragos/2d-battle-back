@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { Socket } from "~shared/shared-types";
+import { Socket } from "@shared/shared-types";
 
 export type ServerType = Server<
     Socket.ClientToServerEvents,

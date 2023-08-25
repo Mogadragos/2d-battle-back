@@ -5,6 +5,7 @@ import {
     workerData,
 } from "node:worker_threads";
 import { ServerType } from "./types/ServerType";
+import * as path from "path";
 
 export class WorkerManager {
     workers: Map<string, Worker>;
@@ -16,7 +17,7 @@ export class WorkerManager {
     }
 
     createWorker(room: string) {
-        const worker = new Worker("./dist/src/game.js");
+        const worker = new Worker(path.resolve(__dirname, "game.js"));
         worker.on("error", (e) => {
             console.error("Worker error");
             console.error(e);
