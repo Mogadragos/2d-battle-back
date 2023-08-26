@@ -13,6 +13,10 @@ export class MatchMaker {
                 this.removePendingGame(socket.id);
             }
         );
+
+        global.eventManager.addEventListener("findGame", (socket: Socket) => {
+            this.findGame(socket);
+        });
     }
 
     findGame(socket: Socket) {

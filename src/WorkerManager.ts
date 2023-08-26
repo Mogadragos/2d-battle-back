@@ -25,7 +25,7 @@ export class WorkerManager {
     }
 
     createWorker(room: string) {
-        const worker = new Worker(path.resolve(__dirname, "game.js"));
+        const worker = new Worker(path.resolve(__dirname, "game", "index.js"));
         worker.on("error", (e) => {
             console.error("Worker error");
             console.error(e);

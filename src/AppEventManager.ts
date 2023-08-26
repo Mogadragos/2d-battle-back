@@ -5,6 +5,8 @@ export class AppEventManager extends EventManager {
         super();
 
         this.registerEvent("disconnecting");
+
+        this.registerEvent("findGame");
         this.registerEvent("joinRoom");
         this.registerEvent("workerStopped");
     }
