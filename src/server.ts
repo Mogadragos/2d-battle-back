@@ -20,7 +20,7 @@ const io: ServerType = new Server(3000, {
 });
 
 const matchmaker = new MatchMaker();
-const workermanager = new WorkerManager(io);
+const workermanager = new WorkerManager();
 
 io.on("connection", function (socket) {
     console.log("user connected");
@@ -33,6 +33,10 @@ io.on("connection", function (socket) {
     if (socket.rooms.size < 2) {
         matchmaker.findGame(socket);
     }
+});
+
+global.eventManager.addEventListener("workerStopped", (room: string) => {
+    io.to(room).emit("close");
 });
 
 console.log("Server Started !");

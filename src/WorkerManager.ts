@@ -1,20 +1,12 @@
-import {
-    Worker,
-    isMainThread,
-    parentPort,
-    workerData,
-} from "node:worker_threads";
-import { ServerType } from "./types/ServerType";
+import { Worker } from "node:worker_threads";
 import * as path from "path";
 import { Socket } from "socket.io";
 
 export class WorkerManager {
     workers: Map<string, Worker>;
-    io: ServerType;
 
-    constructor(io: ServerType) {
+    constructor() {
         this.workers = new Map();
-        this.io = io;
 
         global.eventManager.addEventListener(
             "disconnecting",
@@ -37,12 +29,12 @@ export class WorkerManager {
         worker.on("error", (e) => {
             console.error("Worker error");
             console.error(e);
-            this.io.to(room).emit("close");
+            global.eventManager.dispatchEvent("workerStopped", room);
         });
         worker.on("exit", (code) => {
-            this.io.to(room).emit("close");
             if (code !== 0)
-                console.error(`Worker stopped with exit code ${code}`); // => Worker stopped with exit code 1
+                console.error(`Worker stopped with exit code ${code}`);
+            global.eventManager.dispatchEvent("workerStopped", room);
         });
         worker.on("online", () => {
             this.workers.set(room, worker);
@@ -56,8 +48,8 @@ export class WorkerManager {
         const worker = this.workers.get(room);
         if (worker) {
             worker.terminate();
-            this.io.to(room).emit("close");
             console.log(`worker terminated (room ${room})`);
+            global.eventManager.dispatchEvent("workerStopped", room);
         }
     }
 }

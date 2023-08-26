@@ -1,8 +1,7 @@
-import {
-    Worker,
-    isMainThread,
-    parentPort,
-    workerData,
-} from "node:worker_threads";
+import { parentPort } from "node:worker_threads";
 
-parentPort?.postMessage("I'm alive");
+if (parentPort) {
+    parentPort.postMessage("I'm alive");
+
+    parentPort.on("event", () => {});
+}
