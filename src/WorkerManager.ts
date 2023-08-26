@@ -6,6 +6,7 @@ import {
 } from "node:worker_threads";
 import { ServerType } from "./types/ServerType";
 import * as path from "path";
+import { Socket } from "socket.io";
 
 export class WorkerManager {
     workers: Map<string, Worker>;
@@ -14,6 +15,21 @@ export class WorkerManager {
     constructor(io: ServerType) {
         this.workers = new Map();
         this.io = io;
+
+        global.eventManager.addEventListener(
+            "disconnecting",
+            (socket: Socket) => {
+                for (const room of socket.rooms) {
+                    if (room !== socket.id) {
+                        this.terminateWorker(room);
+                    }
+                }
+            }
+        );
+
+        global.eventManager.addEventListener("joinRoom", (room: string) => {
+            this.createWorker(room);
+        });
     }
 
     createWorker(room: string) {

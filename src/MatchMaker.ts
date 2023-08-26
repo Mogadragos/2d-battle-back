@@ -3,11 +3,16 @@ import { WorkerManager } from "./WorkerManager";
 
 export class MatchMaker {
     pendingRooms: Set<string>;
-    workermanager: WorkerManager;
 
-    constructor(workermanager: WorkerManager) {
+    constructor() {
         this.pendingRooms = new Set<string>();
-        this.workermanager = workermanager;
+
+        global.eventManager.addEventListener(
+            "disconnecting",
+            (socket: Socket) => {
+                this.removePendingGame(socket.id);
+            }
+        );
     }
 
     findGame(socket: Socket) {
@@ -26,7 +31,7 @@ export class MatchMaker {
 
         console.log("join room " + room);
 
-        this.workermanager.createWorker(room);
+        global.eventManager.dispatchEvent("joinRoom", room);
     }
 
     createRoom(socket: Socket) {

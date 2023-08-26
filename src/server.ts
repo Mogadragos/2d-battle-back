@@ -19,22 +19,15 @@ const io: ServerType = new Server(3000, {
     },
 });
 
+const matchmaker = new MatchMaker();
 const workermanager = new WorkerManager(io);
-const matchmaker = new MatchMaker(workermanager);
 
 io.on("connection", function (socket) {
     console.log("user connected");
 
     socket.on("disconnecting", (reason) => {
-        matchmaker.removePendingGame(socket.id);
-
-        for (const room of socket.rooms) {
-            if (room !== socket.id) {
-                workermanager.terminateWorker(room);
-            }
-        }
-
-        console.log("user disconnected");
+        console.log("user disconnecting");
+        global.eventManager.dispatchEvent("disconnecting", socket);
     });
 
     if (socket.rooms.size < 2) {
@@ -43,4 +36,3 @@ io.on("connection", function (socket) {
 });
 
 console.log("Server Started !");
-console.log(__dirname);
