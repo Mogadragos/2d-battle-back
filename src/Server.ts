@@ -29,6 +29,10 @@ export class Server extends ServerIO<
                 global.eventManager.dispatchEvent("disconnecting", socket);
             });
 
+            socket.on("spawn", () => {
+                console.log("Spawn soldier");
+            });
+
             if (socket.rooms.size < 2) {
                 global.eventManager.dispatchEvent("findGame", socket);
             }
