@@ -1,4 +1,4 @@
-import { Server as ServerIO } from "socket.io";
+import { Server as ServerIO, Socket as SocketIO } from "socket.io";
 import { Socket } from "./shared-types";
 
 export class Server extends ServerIO<
@@ -29,6 +29,10 @@ export class Server extends ServerIO<
                 global.eventManager.dispatchEvent("disconnecting", socket);
             });
 
+            socket.on("ready", () =>
+                global.eventManager.dispatchEvent("socketReady", socket)
+            );
+
             socket.on("spawn", () => {
                 console.log("Spawn soldier");
             });
@@ -44,5 +48,18 @@ export class Server extends ServerIO<
                 this.to(room).emit("close");
             }
         );
+
+        global.eventManager.addEventListener(
+            "workerReady",
+            (event: { socketA: SocketIO; socketB: SocketIO }) => {
+                event.socketA.emit("ready", true);
+                event.socketB.emit("ready", false);
+            }
+        );
+
+        global.eventManager.addEventListener("launch", (room: string) => {
+            console.log("launch game");
+            this.to(room).emit("launch");
+        });
     }
 }

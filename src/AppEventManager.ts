@@ -8,6 +8,10 @@ export class AppEventManager extends EventManager {
 
         this.registerEvent("findGame");
         this.registerEvent("roomReady");
+        this.registerEvent("workerReady");
         this.registerEvent("workerStopped");
+
+        this.registerEvent("socketReady");
+        this.registerEvent("launch");
     }
 }

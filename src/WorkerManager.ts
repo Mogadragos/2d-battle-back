@@ -1,6 +1,11 @@
 import { Worker } from "node:worker_threads";
 import * as path from "path";
 import { Socket } from "socket.io";
+import {
+    MainToWorker,
+    WorkerToMain,
+    WorkerToMainEvent,
+} from "./types/WorkerEvent";
 
 export class WorkerManager {
     workers: Map<string, Worker>;
@@ -27,10 +32,23 @@ export class WorkerManager {
                 this.createWorker(event.room, event.socketA, event.socketB);
             }
         );
+
+        global.eventManager.addEventListener(
+            "socketReady",
+            (socket: Socket) => {
+                console.log("socket ready : " + socket.id);
+                socket.data.worker.postMessage({
+                    type: MainToWorker.READY,
+                    data: socket.id,
+                });
+            }
+        );
     }
 
     createWorker(room: string, socketA: Socket, socketB: Socket) {
-        const worker = new Worker(path.resolve(__dirname, "game", "index.js"));
+        const worker = new Worker(path.resolve(__dirname, "game", "index.js"), {
+            workerData: { playerA: socketA.id, playerB: socketB.id },
+        });
         worker.on("error", (e) => {
             console.error("Worker error");
             console.error(e);
@@ -41,14 +59,30 @@ export class WorkerManager {
                 console.error(`Worker stopped with exit code ${code}`);
             global.eventManager.dispatchEvent("workerStopped", room);
         });
+        worker.on("message", (event: WorkerToMainEvent) => {
+            switch (event.type) {
+                case WorkerToMain.LAUNCH:
+                    global.eventManager.dispatchEvent("launch", room);
+                    break;
+                case WorkerToMain.ERROR:
+                default:
+                    console.log("Worker error");
+                    console.log(event.data);
+                    break;
+            }
+        });
+
         worker.on("online", () => {
             this.workers.set(room, worker);
             socketA.data.worker = worker;
             socketB.data.worker = worker;
             console.log("worker created " + room);
-        });
 
-        worker.on("message", (msg) => console.log(msg));
+            global.eventManager.dispatchEvent("workerReady", {
+                socketA,
+                socketB,
+            });
+        });
     }
 
     terminateWorker(room: string) {
