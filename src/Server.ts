@@ -57,9 +57,8 @@ export class Server extends ServerIO<
             }
         );
 
-        global.eventManager.addEventListener("launch", (room: string) => {
-            console.log("launch game");
-            this.to(room).emit("launch");
-        });
+        global.eventManager.addEventListener("launch", (room: string) =>
+            this.to(room).emit("launch")
+        );
     }
 }

@@ -33,15 +33,11 @@ export class WorkerManager {
             }
         );
 
-        global.eventManager.addEventListener(
-            "socketReady",
-            (socket: Socket) => {
-                console.log("socket ready : " + socket.id);
-                socket.data.worker.postMessage({
-                    type: MainToWorker.READY,
-                    data: socket.id,
-                });
-            }
+        global.eventManager.addEventListener("socketReady", (socket: Socket) =>
+            socket.data.worker.postMessage({
+                type: MainToWorker.READY,
+                data: socket.id,
+            })
         );
     }
 
@@ -76,7 +72,6 @@ export class WorkerManager {
             this.workers.set(room, worker);
             socketA.data.worker = worker;
             socketB.data.worker = worker;
-            console.log("worker created " + room);
 
             global.eventManager.dispatchEvent("workerReady", {
                 socketA,
@@ -92,7 +87,6 @@ export class WorkerManager {
             this.workers.delete(room);
             this.rooms.delete(worker);
 
-            console.log(`worker terminated (room ${room})`);
             global.eventManager.dispatchEvent("workerStopped", room);
         }
     }

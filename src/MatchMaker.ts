@@ -20,7 +20,6 @@ export class MatchMaker {
     }
 
     findGame(socket: Socket) {
-        console.log("trying to find game");
         const [firstPendingRoom] = this.pendingRooms;
         if (firstPendingRoom) {
             this.joinRoom(...firstPendingRoom, socket);

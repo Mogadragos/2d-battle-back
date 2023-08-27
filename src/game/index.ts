@@ -39,7 +39,7 @@ if (parentPort) {
                 }
                 break;
             default:
-                console.log("Worker error");
+                // Error ?
                 break;
         }
     });
