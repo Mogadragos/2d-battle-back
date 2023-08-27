@@ -2,10 +2,10 @@ import { Socket } from "socket.io";
 import { WorkerManager } from "./WorkerManager";
 
 export class MatchMaker {
-    pendingRooms: Set<string>;
+    pendingRooms: Map<string, Socket>;
 
     constructor() {
-        this.pendingRooms = new Set<string>();
+        this.pendingRooms = new Map();
 
         global.eventManager.addEventListener(
             "disconnecting",
@@ -23,27 +23,31 @@ export class MatchMaker {
         console.log("trying to find game");
         const [firstPendingRoom] = this.pendingRooms;
         if (firstPendingRoom) {
-            this.joinRoom(socket, firstPendingRoom);
+            this.joinRoom(...firstPendingRoom, socket);
         } else {
             this.createRoom(socket);
         }
     }
 
-    joinRoom(socket: Socket, room: string) {
-        socket.join(room);
+    joinRoom(room: string, socketA: Socket, socketB: Socket) {
         this.pendingRooms.delete(room);
+
+        socketA.join(room);
+        socketB.join(room);
 
         console.log("join room " + room);
 
-        global.eventManager.dispatchEvent("joinRoom", room);
+        global.eventManager.dispatchEvent("roomReady", {
+            room,
+            socketA,
+            socketB,
+        });
     }
 
     createRoom(socket: Socket) {
         const newPendingRoom = this.createRoomName(socket.id);
-        this.pendingRooms.add(newPendingRoom);
-        socket.join(newPendingRoom);
-
-        console.log("create room " + newPendingRoom);
+        this.pendingRooms.set(newPendingRoom, socket);
+        console.log("create pending room " + newPendingRoom);
     }
 
     removePendingGame(socketId: string) {
