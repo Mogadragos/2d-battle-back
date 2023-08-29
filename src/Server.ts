@@ -45,7 +45,7 @@ export class Server extends ServerIO<
         global.eventManager.addEventListener(
             "workerStopped",
             (room: string) => {
-                this.to(room).emit("close");
+                this.in(room).disconnectSockets();
             }
         );
 
