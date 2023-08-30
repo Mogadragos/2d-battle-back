@@ -1,5 +1,4 @@
 import { Socket } from "socket.io";
-import { WorkerManager } from "./WorkerManager";
 
 export class MatchMaker {
     pendingRooms: Map<string, Socket>;
