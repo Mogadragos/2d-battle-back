@@ -1,5 +1,6 @@
-import { Server as ServerIO, Socket as SocketIO } from "socket.io";
-import { Socket } from "./shared-types";
+import { Server as ServerIO } from "socket.io";
+import { Socket } from "@shared/shared-types";
+import { AppSocket } from "./types/SocketTypes";
 
 export class Server extends ServerIO<
     Socket.ClientToServerEvents,
@@ -43,7 +44,7 @@ export class Server extends ServerIO<
 
         global.eventManager.addEventListener(
             "workerReady",
-            (event: { socketA: SocketIO; socketB: SocketIO }) => {
+            (event: { socketA: AppSocket; socketB: AppSocket }) => {
                 event.socketA.emit("ready", true);
                 event.socketB.emit("ready", false);
             }

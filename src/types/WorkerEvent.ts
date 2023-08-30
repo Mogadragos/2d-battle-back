@@ -6,6 +6,7 @@ export enum WorkerToMain {
 
 export enum MainToWorker {
     READY,
+    SPAWN,
 }
 
 export type WorkerToMainEvent = {
@@ -15,5 +16,6 @@ export type WorkerToMainEvent = {
 
 export type MainToWorkerEvent = {
     type: MainToWorker;
-    data: any;
+    player?: string;
+    data?: any;
 };

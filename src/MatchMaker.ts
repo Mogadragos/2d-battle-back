@@ -1,24 +1,27 @@
-import { Socket } from "socket.io";
+import { AppSocket } from "./types/SocketTypes";
 
 export class MatchMaker {
-    pendingRooms: Map<string, Socket>;
+    pendingRooms: Map<string, AppSocket>;
 
     constructor() {
         this.pendingRooms = new Map();
 
         global.eventManager.addEventListener(
             "disconnecting",
-            (socket: Socket) => {
+            (socket: AppSocket) => {
                 this.removePendingGame(socket.id);
             }
         );
 
-        global.eventManager.addEventListener("findGame", (socket: Socket) => {
-            this.findGame(socket);
-        });
+        global.eventManager.addEventListener(
+            "findGame",
+            (socket: AppSocket) => {
+                this.findGame(socket);
+            }
+        );
     }
 
-    findGame(socket: Socket) {
+    findGame(socket: AppSocket) {
         const [firstPendingRoom] = this.pendingRooms;
         if (firstPendingRoom) {
             this.joinRoom(...firstPendingRoom, socket);
@@ -27,7 +30,7 @@ export class MatchMaker {
         }
     }
 
-    joinRoom(room: string, socketA: Socket, socketB: Socket) {
+    joinRoom(room: string, socketA: AppSocket, socketB: AppSocket) {
         this.pendingRooms.delete(room);
 
         socketA.join(room);
@@ -42,7 +45,7 @@ export class MatchMaker {
         });
     }
 
-    createRoom(socket: Socket) {
+    createRoom(socket: AppSocket) {
         const newPendingRoom = this.createRoomName(socket.id);
         this.pendingRooms.set(newPendingRoom, socket);
         console.log("create pending room " + newPendingRoom);
