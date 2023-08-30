@@ -7,10 +7,16 @@ import {
     WorkerToMain,
     WorkerToMainEvent,
 } from "./types/WorkerEvent";
+import { Server } from "./Server";
 
-export class AppWorkerManager extends WorkerManager {
-    constructor() {
+export class GamesManager extends WorkerManager {
+    // Use server for game events to avoid call to eventManager
+    server: Server;
+
+    constructor(server: Server) {
         super(path.resolve(__dirname, "game", "index.js"));
+
+        this.server = server;
 
         global.eventManager.addEventListener(
             "roomReady",
@@ -18,26 +24,21 @@ export class AppWorkerManager extends WorkerManager {
                 this.createWorker(event.room, event.socketA, event.socketB);
             }
         );
-
-        global.eventManager.addEventListener("clientReady", (socket: Socket) =>
-            socket.data.worker.postMessage({
-                type: MainToWorker.READY,
-                data: socket.id,
-            })
-        );
     }
 
     createWorker(room: string, socketA: Socket, socketB: Socket) {
         const worker = super.createWorker(room, socketA, socketB);
 
+        this.initSocketEvent(socketA, room);
+        this.initSocketEvent(socketB, room);
+
         worker.on("message", (event: WorkerToMainEvent) => {
             switch (event.type) {
                 case WorkerToMain.LAUNCH:
-                    global.eventManager.dispatchEvent("launch", room);
+                    this.server.to(room).emit("launch");
                     break;
                 case WorkerToMain.UPDATE:
-                    console.log("Update");
-                    console.log(event.data);
+                    this.server.to(room).emit("update", event.data);
                     break;
                 case WorkerToMain.ERROR:
                 default:
@@ -48,5 +49,19 @@ export class AppWorkerManager extends WorkerManager {
         });
 
         return worker;
+    }
+
+    initSocketEvent(socket: Socket, room: string) {
+        socket.on("ready", () => {
+            console.log(`Room ${room} // Socket ${socket.id} // Ready`);
+            socket.data.worker.postMessage({
+                type: MainToWorker.READY,
+                data: socket.id,
+            });
+        });
+
+        socket.on("spawn", (type) => {
+            console.log(`Room ${room} // Socket ${socket.id} // Spawn ${type}`);
+        });
     }
 }

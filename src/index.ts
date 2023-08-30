@@ -2,7 +2,7 @@ import "module-alias/register";
 
 import { AppEventManager } from "./AppEventManager";
 import { MatchMaker } from "./MatchMaker";
-import { AppWorkerManager } from "./AppWorkerManager";
+import { GamesManager } from "./GamesManager";
 import { Server } from "./Server";
 
 declare global {
@@ -11,7 +11,7 @@ declare global {
 
 global.eventManager = new AppEventManager();
 
-const matchmaker = new MatchMaker();
-const workermanager = new AppWorkerManager();
-
 const server = new Server();
+
+const matchmaker = new MatchMaker();
+const gamesmanager = new GamesManager(server);

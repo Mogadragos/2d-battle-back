@@ -29,14 +29,6 @@ export class Server extends ServerIO<
                 global.eventManager.dispatchEvent("disconnecting", socket);
             });
 
-            socket.on("ready", () =>
-                global.eventManager.dispatchEvent("clientReady", socket)
-            );
-
-            socket.on("spawn", () => {
-                console.log("Spawn soldier");
-            });
-
             if (socket.rooms.size < 2) {
                 global.eventManager.dispatchEvent("findGame", socket);
             }
@@ -55,10 +47,6 @@ export class Server extends ServerIO<
                 event.socketA.emit("ready", true);
                 event.socketB.emit("ready", false);
             }
-        );
-
-        global.eventManager.addEventListener("launch", (room: string) =>
-            this.to(room).emit("launch")
         );
     }
 }
