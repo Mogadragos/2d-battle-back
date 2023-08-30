@@ -1,3 +1,5 @@
+import "module-alias/register";
+
 import {
     parentPort as undefParentPort,
     workerData as anyData,

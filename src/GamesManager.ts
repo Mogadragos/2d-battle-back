@@ -69,7 +69,7 @@ export class GamesManager extends WorkerManager {
             socket.data.worker?.postMessage({
                 type: MainToWorker.SPAWN,
                 player: socket.id,
-                data: { player: socket.id },
+                data: type,
             });
         });
     }
