@@ -30,7 +30,7 @@ export class Server extends ServerIO<
             });
 
             socket.on("ready", () =>
-                global.eventManager.dispatchEvent("socketReady", socket)
+                global.eventManager.dispatchEvent("clientReady", socket)
             );
 
             socket.on("spawn", () => {

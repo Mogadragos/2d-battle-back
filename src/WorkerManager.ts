@@ -33,7 +33,7 @@ export class WorkerManager {
             }
         );
 
-        global.eventManager.addEventListener("socketReady", (socket: Socket) =>
+        global.eventManager.addEventListener("clientReady", (socket: Socket) =>
             socket.data.worker.postMessage({
                 type: MainToWorker.READY,
                 data: socket.id,
@@ -59,6 +59,10 @@ export class WorkerManager {
             switch (event.type) {
                 case WorkerToMain.LAUNCH:
                     global.eventManager.dispatchEvent("launch", room);
+                    break;
+                case WorkerToMain.UPDATE:
+                    console.log("Update");
+                    console.log(event.data);
                     break;
                 case WorkerToMain.ERROR:
                 default:

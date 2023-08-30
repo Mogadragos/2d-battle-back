@@ -11,7 +11,7 @@ export class AppEventManager extends EventManager {
         this.registerEvent("workerReady");
         this.registerEvent("workerStopped");
 
-        this.registerEvent("socketReady");
+        this.registerEvent("clientReady");
         this.registerEvent("launch");
     }
 }

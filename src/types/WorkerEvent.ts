@@ -1,6 +1,7 @@
 export enum WorkerToMain {
     ERROR,
     LAUNCH,
+    UPDATE,
 }
 
 export enum MainToWorker {

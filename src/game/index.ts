@@ -3,44 +3,12 @@ import {
     workerData as anyData,
 } from "node:worker_threads";
 
-import {
-    MainToWorker,
-    MainToWorkerEvent,
-    WorkerToMain,
-} from "../types/WorkerEvent";
-
-var workerData: {
-    playerA: string;
-    playerB: string;
-} = anyData;
+import { WorkerData } from "./types/WorkerData";
+import { GameEngine } from "./GameEngine";
 
 var parentPort = undefParentPort!;
+var workerData: WorkerData = anyData;
 
 if (parentPort) {
-    const playerA = {
-        id: workerData.playerA,
-        ready: false,
-    };
-    const playerB = {
-        id: workerData.playerB,
-        ready: false,
-    };
-    const players = {
-        [workerData.playerA]: playerA,
-        [workerData.playerB]: playerB,
-    };
-
-    parentPort.on("message", (event: MainToWorkerEvent) => {
-        switch (event.type) {
-            case MainToWorker.READY:
-                players[event.data].ready = true;
-                if (playerA.ready && playerB.ready) {
-                    parentPort.postMessage({ type: WorkerToMain.LAUNCH });
-                }
-                break;
-            default:
-                // Error ?
-                break;
-        }
-    });
+    const gameEngine = new GameEngine(parentPort, workerData);
 }
