@@ -14,7 +14,9 @@ import {
     TypeEnum,
     EntityData,
     GameData,
+    TYPE_DATA,
 } from "@shared/shared-types/game-types";
+import { Utils } from "./Utils";
 
 export class GameEngine extends Engine {
     // technical
@@ -32,18 +34,8 @@ export class GameEngine extends Engine {
 
         this.parentPort = parentPort;
 
-        this.playerA = {
-            id: workerData.playerA,
-            playerA: true,
-            ready: false,
-            spawnX: 48,
-        };
-        this.playerB = {
-            id: workerData.playerB,
-            playerA: false,
-            ready: false,
-            spawnX: 2000,
-        };
+        this.playerA = Utils.initPlayer(workerData.playerA, true);
+        this.playerB = Utils.initPlayer(workerData.playerB, false);
         this.players = {
             [workerData.playerA]: this.playerA,
             [workerData.playerB]: this.playerB,
@@ -75,11 +67,11 @@ export class GameEngine extends Engine {
     }
 
     trySpawn(event: { player: string; data: TypeEnum }) {
-        // TODO check cost
         const player = this.players[event.player];
-        const haveEnoughMoney = true;
-        if (haveEnoughMoney) {
-            // TODO reduce money
+        const entity = TYPE_DATA[event.data];
+        const remaining = player.gold - entity.cost;
+        if (remaining > -1) {
+            player.gold = remaining;
             // TODO add delay to game data (once)
             this.spawn(player, event.data);
         }
