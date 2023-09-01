@@ -88,26 +88,16 @@ export class GameEngine extends Engine {
         );
 
         if (entityInPool) {
-            this.resetEntity(player, entityInPool, type);
+            Utils.resetEntity(player, entityInPool, type);
         } else {
             this.gameData.entities.push(
-                this.resetEntity(
+                Utils.resetEntity(
                     player,
                     { id: this.gameData.entities.length + 1 } as Entity,
                     type
                 )
             );
         }
-    }
-
-    resetEntity(player: Player, entity: Entity, type: EntityEnum) {
-        const player_data = PLAYER_DATA[player.playerA];
-        entity.alive = true;
-        entity.playerA = player_data.playerA;
-        entity.x = player_data.spawnX;
-        entity.type = type;
-        entity.anim = AnimEnum.WALK;
-        return entity;
     }
 
     launch() {
@@ -119,6 +109,10 @@ export class GameEngine extends Engine {
     }
 
     update(delta: number) {
+        for (const entity of this.gameData.entities) {
+            entity.x += entity.speed * delta;
+        }
+
         this.parentPort.postMessage({
             type: WorkerToMain.UPDATE,
             data: this.gameData,
