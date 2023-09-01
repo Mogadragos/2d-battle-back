@@ -1,6 +1,7 @@
 import { Server as ServerIO } from "socket.io";
 import { Socket } from "@shared/shared-types";
 import { AppSocket } from "./types/SocketTypes";
+import { PlayerEnum } from "@shared/shared-types/game-types";
 
 export class Server extends ServerIO<
     Socket.ClientToServerEvents,
@@ -45,8 +46,8 @@ export class Server extends ServerIO<
         global.eventManager.addEventListener(
             "workerReady",
             (event: { socketA: AppSocket; socketB: AppSocket }) => {
-                event.socketA.emit("ready", true);
-                event.socketB.emit("ready", false);
+                event.socketA.emit("ready", PlayerEnum.PLAYER_A);
+                event.socketB.emit("ready", PlayerEnum.PLAYER_B);
             }
         );
     }
