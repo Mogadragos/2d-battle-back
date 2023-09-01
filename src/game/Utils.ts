@@ -1,12 +1,9 @@
-import { AgeEnum } from "@shared/shared-types/game/AgeEnum";
-import { Player } from "./types/Player";
+import { AgeEnum, Player, PlayerEnum } from "@shared/shared-types/game-types";
 
 export class Utils {
-    static initPlayer(id: string, playerA: boolean): Player {
+    static initPlayer(playerA: PlayerEnum): Player {
         return {
-            id: id,
             playerA: playerA,
-            spawnX: playerA ? 48 : 2000,
             ready: false,
 
             age: AgeEnum.ONE,

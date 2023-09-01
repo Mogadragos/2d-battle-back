@@ -5,7 +5,7 @@ import {
     MainToWorker,
     WorkerToMain,
     WorkerToMainEvent,
-} from "./types/WorkerEvent";
+} from "./game/types/WorkerEvent";
 import { Server } from "./Server";
 import { AppSocket } from "./types/SocketTypes";
 

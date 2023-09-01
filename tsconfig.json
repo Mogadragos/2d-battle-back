@@ -7,5 +7,10 @@
         "rootDirs": ["./src", "./2d-battle-shared"],
         "outDir": "./dist"
     },
-    "include": ["src/*", "src/types/*", "src/game/*"]
+    "include": [
+        "src/*",
+        "src/types/*",
+        "src/game/*",
+        "src/game/types/WorkerEvent.ts"
+    ]
 }
