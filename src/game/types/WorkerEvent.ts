@@ -14,8 +14,8 @@ export type WorkerToMainEvent = {
     data: any;
 };
 
-export type MainToWorkerEvent = {
+export type MainToWorkerEvent<T = any> = {
     type: MainToWorker;
     player: string;
-    data: any;
+    data: T;
 };

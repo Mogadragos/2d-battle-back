@@ -7,16 +7,33 @@ import {
     Player,
     PlayerEnum,
 } from "@shared/shared-types/game-types";
+import { BuildEnum } from "@shared/shared-types/game/Build";
+import { LocalPlayer } from "./types/LocalPlayer";
 
 export class Utils {
-    static initPlayer(playerA: PlayerEnum): Player {
+    static initPlayer(player: PlayerEnum): Player {
         return {
-            playerA: playerA,
-            ready: false,
+            player: player,
 
             age: AgeEnum.ONE,
             xp: 0,
-            gold: 100,
+            gold: 1000,
+
+            buildTime: 0,
+            buildStatus: BuildEnum.ZERO,
+        };
+    }
+    static initLocalPlayer(): LocalPlayer {
+        return {
+            ready: false,
+            toBuild: [],
+            buildTimer: 0,
+        };
+    }
+    static initPlayerData(player: PlayerEnum) {
+        return {
+            local: this.initLocalPlayer(),
+            player: this.initPlayer(player),
         };
     }
 
@@ -25,7 +42,7 @@ export class Utils {
         entity: Entity,
         type: EntityEnum
     ): Entity {
-        const player_data = PLAYER_DATA[player.playerA];
+        const player_data = PLAYER_DATA[player.player];
         entity.alive = true;
         entity.playerA = player_data.playerA;
         entity.x = player_data.spawnX;

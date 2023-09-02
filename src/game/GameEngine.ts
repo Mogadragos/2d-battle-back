@@ -10,23 +10,25 @@ import { Engine } from "./lib/Engine";
 import { Utils } from "./Utils";
 
 import {
-    AnimEnum,
+    BuildEnum,
     Entity,
     EntityEnum,
     Game,
     Player,
     PlayerEnum,
 } from "@shared/shared-types/game-types";
-import { ENTITY_DATA, PLAYER_DATA } from "@shared/data";
+import { PlayerData } from "./types/PlayerData";
+
+import { ENTITY_DATA } from "@shared/data";
 
 export class GameEngine extends Engine {
     // technical
     parentPort: MessagePort;
 
     // game
-    playerA: Player;
-    playerB: Player;
-    players: Record<string, Player>;
+    playerDataA: PlayerData;
+    playerDataB: PlayerData;
+    playersById: Record<string, PlayerData>;
 
     gameData: Game;
 
@@ -35,18 +37,18 @@ export class GameEngine extends Engine {
 
         this.parentPort = parentPort;
 
-        this.playerA = Utils.initPlayer(PlayerEnum.PLAYER_A);
-        this.playerB = Utils.initPlayer(PlayerEnum.PLAYER_B);
-        this.players = {
-            [workerData.playerA]: this.playerA,
-            [workerData.playerB]: this.playerB,
+        this.playerDataA = Utils.initPlayerData(PlayerEnum.PLAYER_A);
+        this.playerDataB = Utils.initPlayerData(PlayerEnum.PLAYER_B);
+        this.playersById = {
+            [workerData.playerA]: this.playerDataA,
+            [workerData.playerB]: this.playerDataB,
         };
 
         this.gameData = {
             entities: [],
             players: {
-                [PlayerEnum.PLAYER_A]: this.playerA,
-                [PlayerEnum.PLAYER_B]: this.playerB,
+                [PlayerEnum.PLAYER_A]: this.playerDataA.player,
+                [PlayerEnum.PLAYER_B]: this.playerDataB.player,
             },
         };
 
@@ -65,20 +67,60 @@ export class GameEngine extends Engine {
     }
 
     setReady(player: string) {
-        this.players[player].ready = true;
-        if (this.playerA.ready && this.playerB.ready) {
+        this.playersById[player].local.ready = true;
+        if (this.playerDataA.local.ready && this.playerDataB.local.ready) {
             this.launch();
         }
     }
 
-    trySpawn(event: { player: string; data: EntityEnum }) {
-        const player = this.players[event.player];
+    trySpawn(event: MainToWorkerEvent<EntityEnum>) {
+        const { local, player } = this.playersById[event.player];
         const entity = ENTITY_DATA[event.data];
-        const remaining = player.gold - entity.cost;
-        if (remaining > -1) {
-            player.gold = remaining;
-            // TODO add delay to game data (once)
-            this.spawn(player, event.data);
+        const remainingGold = player.gold - entity.cost;
+        if (player.buildStatus < BuildEnum.FIVE && remainingGold > -1) {
+            player.gold = remainingGold;
+            player.buildStatus++;
+            local.toBuild.push({
+                type: event.data,
+                time: entity.buildTime,
+            });
+        }
+    }
+
+    launch() {
+        this.parentPort.postMessage({
+            type: WorkerToMain.LAUNCH,
+        });
+
+        super.launch();
+    }
+
+    update(delta: number) {
+        for (const entity of this.gameData.entities) {
+            entity.x += entity.speed * delta;
+        }
+
+        this.updateToBuild(this.playerDataA, delta);
+        this.updateToBuild(this.playerDataB, delta);
+
+        this.parentPort.postMessage({
+            type: WorkerToMain.UPDATE,
+            data: this.gameData,
+        });
+    }
+
+    updateToBuild({ player, local }: PlayerData, delta: number) {
+        if (!local.currentBuild && local.toBuild[0]) {
+            local.currentBuild = local.toBuild.shift()!;
+            player.buildTime = local.currentBuild.time;
+        }
+        if (local.currentBuild) {
+            local.buildTimer += delta;
+            if (!(local.buildTimer < local.currentBuild.time)) {
+                this.spawn(player, local.currentBuild.type);
+                local.currentBuild = undefined;
+                local.buildTimer = 0;
+            }
         }
     }
 
@@ -98,24 +140,8 @@ export class GameEngine extends Engine {
                 )
             );
         }
-    }
 
-    launch() {
-        this.parentPort.postMessage({
-            type: WorkerToMain.LAUNCH,
-        });
-
-        super.launch();
-    }
-
-    update(delta: number) {
-        for (const entity of this.gameData.entities) {
-            entity.x += entity.speed * delta;
-        }
-
-        this.parentPort.postMessage({
-            type: WorkerToMain.UPDATE,
-            data: this.gameData,
-        });
+        player.buildTime = 0;
+        player.buildStatus--;
     }
 }
