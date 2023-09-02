@@ -55,4 +55,30 @@ export class Utils {
         entity.anim = AnimEnum.WALK;
         return entity;
     }
+
+    static canSpawn(
+        player: Player,
+        entity: EntityEnum,
+        entities: Entity[]
+    ): boolean {
+        if (entities.length < 1) {
+            return true;
+        }
+
+        const player_data = PLAYER_DATA[player.player];
+        const entity_half_width = ENTITY_DATA[entity].width / 2;
+        const last_entity = entities[entities.length - 1];
+        const last_entity_half_width = ENTITY_DATA[last_entity.type].width / 2;
+
+        if (player_data.playerA) {
+            return (
+                player_data.spawnX + entity_half_width <
+                last_entity.x - last_entity_half_width
+            );
+        }
+        return (
+            player_data.spawnX - entity_half_width >
+            last_entity.x + last_entity_half_width
+        );
+    }
 }

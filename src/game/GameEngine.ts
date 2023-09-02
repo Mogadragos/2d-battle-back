@@ -10,6 +10,7 @@ import { Engine } from "./lib/Engine";
 import { Utils } from "./Utils";
 
 import {
+    AnimEnum,
     BuildEnum,
     Entity,
     EntityEnum,
@@ -84,6 +85,7 @@ export class GameEngine extends Engine {
             local.toBuild.push({
                 type: event.data,
                 time: entity.buildTime,
+                ready: false,
             });
         }
     }
@@ -97,13 +99,26 @@ export class GameEngine extends Engine {
     }
 
     update(delta: number) {
+        // Move entities
         for (const entity of this.allEntities) {
-            if (entity.alive) entity.x += entity.speed * delta;
+            if (entity.alive) {
+                switch (entity.anim) {
+                    case AnimEnum.WALK:
+                        entity.x += entity.speed * delta;
+                        break;
+                }
+            }
         }
 
+        // Move -> Collide / Move OR Attack -> Attack / Move
+
+        // Update death status
+
+        // Update to build
         this.updateToBuild(this.playerDataA, delta);
         this.updateToBuild(this.playerDataB, delta);
 
+        // Send update
         this.parentPort.postMessage({
             type: WorkerToMain.UPDATE,
             data: this.gameData,
@@ -116,8 +131,16 @@ export class GameEngine extends Engine {
             player.buildTime = local.currentBuild.time;
         }
         if (local.currentBuild) {
-            local.buildTimer += delta;
-            if (!(local.buildTimer < local.currentBuild.time)) {
+            if (!local.currentBuild.ready) {
+                local.buildTimer += delta;
+                if (!(local.buildTimer < local.currentBuild.time)) {
+                    local.currentBuild.ready = true;
+                }
+            }
+            if (
+                local.currentBuild.ready &&
+                Utils.canSpawn(player, local.currentBuild.type, player.entities)
+            ) {
                 this.spawn(player, local.currentBuild.type);
                 local.currentBuild = undefined;
                 local.buildTimer = 0;
