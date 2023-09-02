@@ -30,6 +30,8 @@ export class GameEngine extends Engine {
     playerDataB: PlayerData;
     playersById: Record<string, PlayerData>;
 
+    allEntities: Entity[];
+
     gameData: Game;
 
     constructor(parentPort: MessagePort, workerData: WorkerData, fps = 20) {
@@ -44,12 +46,11 @@ export class GameEngine extends Engine {
             [workerData.playerB]: this.playerDataB,
         };
 
+        this.allEntities = [];
+
         this.gameData = {
-            entities: [],
-            players: {
-                [PlayerEnum.PLAYER_A]: this.playerDataA.player,
-                [PlayerEnum.PLAYER_B]: this.playerDataB.player,
-            },
+            [PlayerEnum.PLAYER_A]: this.playerDataA.player,
+            [PlayerEnum.PLAYER_B]: this.playerDataB.player,
         };
 
         this.parentPort.on("message", (event: MainToWorkerEvent) => {
@@ -96,8 +97,8 @@ export class GameEngine extends Engine {
     }
 
     update(delta: number) {
-        for (const entity of this.gameData.entities) {
-            entity.x += entity.speed * delta;
+        for (const entity of this.allEntities) {
+            if (entity.alive) entity.x += entity.speed * delta;
         }
 
         this.updateToBuild(this.playerDataA, delta);
@@ -125,20 +126,18 @@ export class GameEngine extends Engine {
     }
 
     spawn(player: Player, type: EntityEnum) {
-        const entityInPool = this.gameData.entities.find(
-            (entity) => !entity.alive
-        );
+        const entityInPool = this.allEntities.find((entity) => !entity.alive);
 
         if (entityInPool) {
             Utils.resetEntity(player, entityInPool, type);
         } else {
-            this.gameData.entities.push(
-                Utils.resetEntity(
-                    player,
-                    { id: this.gameData.entities.length + 1 } as Entity,
-                    type
-                )
+            const entity = Utils.resetEntity(
+                player,
+                { id: this.allEntities.length + 1 } as Entity,
+                type
             );
+            this.allEntities.push(entity);
+            player.entities.push(entity);
         }
 
         player.buildTime = 0;

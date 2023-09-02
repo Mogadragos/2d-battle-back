@@ -21,6 +21,8 @@ export class Utils {
 
             buildTime: 0,
             buildStatus: BuildEnum.ZERO,
+
+            entities: [],
         };
     }
     static initLocalPlayer(): LocalPlayer {
@@ -43,12 +45,12 @@ export class Utils {
         type: EntityEnum
     ): Entity {
         const player_data = PLAYER_DATA[player.player];
+        const entity_data = ENTITY_DATA[type];
         entity.alive = true;
-        entity.playerA = player_data.playerA;
         entity.x = player_data.spawnX;
         entity.speed = player_data.playerA
-            ? ENTITY_DATA[type].speed
-            : -ENTITY_DATA[type].speed;
+            ? entity_data.speed
+            : -entity_data.speed;
         entity.type = type;
         entity.anim = AnimEnum.WALK;
         return entity;
