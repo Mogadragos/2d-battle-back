@@ -100,15 +100,8 @@ export class GameEngine extends Engine {
 
     update(delta: number) {
         // Move entities
-        for (const entity of this.allEntities) {
-            if (entity.alive) {
-                switch (entity.anim) {
-                    case AnimEnum.WALK:
-                        entity.x += entity.speed * delta;
-                        break;
-                }
-            }
-        }
+        this.moveEntities(this.playerDataA, delta);
+        this.moveEntities(this.playerDataB, delta);
 
         // Move -> Collide / Move OR Attack -> Attack / Move
 
@@ -123,6 +116,24 @@ export class GameEngine extends Engine {
             type: WorkerToMain.UPDATE,
             data: this.gameData,
         });
+    }
+
+    moveEntities({ player }: PlayerData, delta: number) {
+        // If hp < 0 -> anim.DEATH + remove from list + remove from attacking ennemies (+ todo make accessible from pool after death animation)
+        // If previous dead -> anim.WALK
+        // Else
+        // If anim.ATTACK -> check ennemy alive
+        // --> YES : Apply damage + continue;
+        // --> NO : anim.WALK
+        // If !anim.WALK -> stop loop
+        // move
+        for (const entity of player.entities) {
+            switch (entity.anim) {
+                case AnimEnum.WALK:
+                    entity.x += entity.speed * delta;
+                    break;
+            }
+        }
     }
 
     updateToBuild({ player, local }: PlayerData, delta: number) {
